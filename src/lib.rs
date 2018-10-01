@@ -1,2 +1,2 @@
-mod bytepacketbuffer;
-mod dns;
+pub mod bytepacketbuffer;
+pub mod dns;
