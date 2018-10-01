@@ -1,3 +1,4 @@
+pub mod kinddns;
 use super::bytepacketbuffer::BytePacketBuffer;
 use std::net::Ipv4Addr;
 use std::io::Result;
@@ -183,3 +184,4 @@ impl DnsRecord {
         }
     }
 }
+
