@@ -36,6 +36,15 @@ impl BytePacketBuffer {
         Ok(res)
     }
 
+    pub fn write(&mut self,buf: u8) -> Result<()> {
+        if self.pos >= 512 {
+            return Err(Error::new(ErrorKind::InvalidInput,"End of buffer to write"));
+        }
+        self.buf[self.pos] = buf;
+        self.pos += 1;
+        Ok(())
+    }
+
     fn get(&mut self,pos: usize) -> Result<u8> {
         if pos >= 512 {
             return Err(Error::new(ErrorKind::InvalidInput,"End of buffer to get"));
@@ -93,5 +102,25 @@ impl BytePacketBuffer {
         }
         Ok(())
     }
+
+    pub fn write_u16(&mut self,buf: u16) -> Result<()> {
+        if self.pos >= 512 {
+            return Err(Error::new(ErrorKind::InvalidInput,"End of buffer to write_u16"))
+        }
+        self.write((buf << 8) as u8)?;
+        self.write((buf & 0xff) as u8)?;
+        Ok(())
+    }
+
+    pub fn write_u32(&mut self,buf: u32) -> Result<()> {
+        if self.pos >= 512 {
+            return Err(Error::new(ErrorKind::InvalidInput, "End of buffer to write_u32"))
+        }
+        self.write_u16((buf << 16) as u16)?;
+        self.write_u16((buf & 0xffff)as u16)?;
+        Ok(())
+    }
+
+    
 
 }
