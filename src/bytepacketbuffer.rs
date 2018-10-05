@@ -121,6 +121,16 @@ impl BytePacketBuffer {
         Ok(())
     }
 
-    
-
+    pub fn write_qname(&mut self,qname: &str) -> Result<()> {
+        let split_str = qname.split('.').collect::<Vec<&str>>();
+        for label in split_str {
+            let len = label.len();
+            self.write(len as u8)?;
+            for b in label.as_bytes() {
+                self.write(*b)?;
+            }
+        }
+        self.write(0)?;
+        Ok(())
+    }
 }
