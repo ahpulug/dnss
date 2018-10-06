@@ -87,6 +87,29 @@ impl DnsHeader {
         self.additional_rrs = buffer.read_u16()?;
         Ok(())
     }
+
+    pub fn write(&self,buffer: &mut BytePacketBuffer) -> Result<()> {
+        buffer.write_u16(self.id)?;
+
+        buffer.write(((self.recursion_desired as u8)) |
+                        ((self.truncated_message as u8) << 1) |
+                        ((self.authoritative_answer as u8) << 2) |
+                        (self.operation_code << 3) |
+                        ((self.response as u8) << 7) as u8)?;
+
+        buffer.write((self.response_code.clone() as u8) |
+                        ((self.checking_disabled as u8) << 4) |
+                        ((self.authed_data as u8) << 5) |
+                        ((self.z as u8) << 6) |
+                        ((self.recursion_avilable as u8) << 7) )?;
+
+        buffer.write_u16(self.questions)?;
+        buffer.write_u16(self.answers)?;
+        buffer.write_u16(self.authority_rrs)?;
+        buffer.write_u16(self.additional_rrs)?;
+
+        Ok(())
+    }
 }
 
 #[derive(PartialEq,Eq,Debug,Clone,Hash,Copy)]
@@ -131,6 +154,14 @@ impl DnsQuestion {
         let _ = buffer.read_u16()?;
         Ok(())
     }
+
+    pub fn write(&self,buffer: &mut BytePacketBuffer) -> Result<()> {
+        buffer.write_qname(&self.name)?;
+        let typenum = self.qtype.to_num();
+        buffer.write_u16(typenum)?;
+        buffer.write_u16(1)?;
+        Ok(())
+    } 
 }
 
 #[derive(Debug,Clone,PartialEq,Eq,Hash,PartialOrd,Ord)]
@@ -182,6 +213,28 @@ impl DnsRecord {
                 })
             }
         }
+    }
+
+    pub fn write(&self,buffer: &mut BytePacketBuffer) -> Result<()> {
+        match *self {
+            DnsRecord::A { ref domain, ref addr, ttl } => {
+                buffer.write_qname(domain)?;
+                buffer.write_u16(QueryType::A.to_num())?;
+                buffer.write_u16(1)?;
+                buffer.write_u32(ttl)?;
+                buffer.write_u16(4)?;
+
+                let octets = addr.octets();
+                buffer.write(octets[0])?;
+                buffer.write(octets[1])?;
+                buffer.write(octets[2])?;
+                buffer.write(octets[3])?;
+            },
+            DnsRecord::UNKOWN { .. } => {
+                println!("Skipping record: {:?}", self);
+            }
+        }
+        Ok(())
     }
 }
 
