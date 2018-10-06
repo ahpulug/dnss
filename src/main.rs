@@ -5,7 +5,7 @@ use dnss::dns::kinddns::DnsPacket;
 use dnss::bytepacketbuffer::BytePacketBuffer;
 use dnss::dns::*;
 fn main() {
-    let qname = "baidu.com";
+    let qname = "www.yahoo.com";
     let qtype = QueryType::A;
     let server = ("114.114.114.114",53);
     let socket = UdpSocket::bind("0.0.0.0:34254").unwrap();
