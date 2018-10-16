@@ -177,7 +177,6 @@ impl DnsQuestion {
 }
 
 #[derive(Debug,Clone,PartialEq,Eq,Hash,PartialOrd,Ord)]
-#[allow(dead_code)]
 pub enum DnsRecord {
     UNKOWN {
         domain: String,

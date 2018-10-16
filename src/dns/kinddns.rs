@@ -1,5 +1,6 @@
 use super::{DnsHeader,DnsQuestion,DnsRecord,QueryType};
 use std::io::Result;
+use std::mem;
 use super::super::bytepacketbuffer::BytePacketBuffer;
 #[derive(Clone,Debug)]
 pub struct UdpDns {
@@ -51,6 +52,7 @@ impl UdpDns {
         self.header.answers = self.answers.len() as u16;
         self.header.authority_rrs = self.authorities.len() as u16;
         self.header.additional_rrs = self.resources.len() as u16;
+        println!("id为{}", self.header.id);
         self.header.write(buffer)?;
 
         for question in &self.questions {
@@ -111,7 +113,7 @@ impl TcpDns {
             let rec = DnsRecord::read(buffer)?;
             result.authorities.push(rec);
         }
-
+        println!("addrss : {}",result.header.additional_rrs);
         for _ in 0..result.header.additional_rrs {
             let rec = DnsRecord::read(buffer)?;
             result.resources.push(rec);
@@ -141,5 +143,22 @@ impl TcpDns {
             resource.write(buffer)?;
         }
         Ok(())
+    }
+
+    pub fn from_udp_dns(udp_dns: &mut UdpDns) -> Result<TcpDns> {
+        let mut byte = BytePacketBuffer::new();
+        byte.write_u16(0 as u16)?;
+        udp_dns.resources = Vec::new();
+        println!("{:?}", udp_dns.header.id);
+        udp_dns.write(&mut byte)?;
+        let len = byte.pos - 2;
+        println!("{}", len);
+        byte.pos = 0;
+        byte.write_u16(len as u16)?;
+        byte.pos = 0;
+        println!("{}", byte.pos);
+        let n = TcpDns::from_buffer(&mut byte)?;
+        println!("{:?}", n.header.id);
+        Ok(n)
     }
 }
