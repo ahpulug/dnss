@@ -90,7 +90,6 @@ impl DnsHeader {
 
     pub fn write(&self,buffer: &mut BytePacketBuffer) -> Result<()> {
         buffer.write_u16(self.id)?;
-
         buffer.write(((self.recursion_desired as u8)) |
                         ((self.truncated_message as u8) << 1) |
                         ((self.authoritative_answer as u8) << 2) |

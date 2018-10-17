@@ -107,7 +107,7 @@ impl BytePacketBuffer {
         if self.pos >= 512 {
             return Err(Error::new(ErrorKind::InvalidInput,"End of buffer to write_u16"))
         }
-        self.write((buf << 8) as u8)?;
+        self.write((buf >> 8) as u8)?;
         self.write((buf & 0xff) as u8)?;
         Ok(())
     }
@@ -116,7 +116,7 @@ impl BytePacketBuffer {
         if self.pos >= 512 {
             return Err(Error::new(ErrorKind::InvalidInput, "End of buffer to write_u32"))
         }
-        self.write_u16((buf << 16) as u16)?;
+        self.write_u16((buf >> 16) as u16)?;
         self.write_u16((buf & 0xffff)as u16)?;
         Ok(())
     }

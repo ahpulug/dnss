@@ -6,7 +6,6 @@ use std::io::{Read, Write};
 use dnss::dns::kinddns::{UdpDns,TcpDns};
 use dnss::bytepacketbuffer::BytePacketBuffer;
 use dnss::dns::*;
-use std::mem;
 use native_tls::TlsConnector;
 fn main() {
     let qname = "www.yahoo.com";
@@ -49,7 +48,7 @@ fn main() {
     let mut stream = connector.connect("cloudflare-dns.com", stream).unwrap();
     let mut byte = BytePacketBuffer::new();
     packet.write(&mut byte).unwrap();
-    stream.write_all(&mut byte.buf).unwrap();
+    stream.write_all(&mut byte.buf[..byte.pos]).unwrap();
     let mut res = vec![];
     stream.read_to_end(&mut res).unwrap();
     println!("收到请求");
