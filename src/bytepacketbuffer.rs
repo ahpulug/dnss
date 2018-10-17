@@ -83,7 +83,7 @@ impl BytePacketBuffer {
                 }
                 let b2 = (self.get(pos+1)?) as u16;
                 let offset = (((len as u16) ^ 0xc0) << 8) | b2;
-                pos = offset as usize + 2;
+                pos = offset as usize + 2;   //如果是从tcp读  需要加2  因为tcp开始是两个byte的长度
                 jumped = true;
                 continue;
             }

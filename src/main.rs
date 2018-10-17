@@ -70,6 +70,20 @@ fn main() {
         println!("{:?}", rec);
     }
     let mut udp_byte = BytePacketBuffer::new();
+    let mut res_packet = UdpDns::from_tcp_dns(&mut res_packet).unwrap();
+    println!("{:?}", res_packet.header);
+    for q in res_packet.questions.clone() {
+        println!("{:?}", q);
+    }
+    for rec in res_packet.answers.clone() {
+        println!("{:?}", rec);
+    }
+    for rec in res_packet.authorities.clone() {
+        println!("{:?}", rec);
+    }
+    for rec in res_packet.resources.clone() {
+        println!("{:?}", rec);
+    }
     res_packet.write(&mut udp_byte).unwrap();
     socket.send_to(&udp_byte.buf[0..udp_byte.pos],&src).unwrap();
     // let mut packet = UdpDns::new();

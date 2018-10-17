@@ -70,6 +70,17 @@ impl UdpDns {
         }
         Ok(())
     }
+
+    pub fn from_tcp_dns(tcp_dns: &mut TcpDns) -> Result<UdpDns> {
+        let mut udpdns = UdpDns::new();
+        udpdns.header = tcp_dns.header.clone();
+        udpdns.questions = tcp_dns.questions.clone();
+        udpdns.answers = tcp_dns.answers.clone();
+        udpdns.authorities = tcp_dns.authorities.clone();
+        udpdns.resources = tcp_dns.resources.clone();
+        Ok(udpdns)
+    }
+
 }
 
 #[derive(Clone,Debug)]
