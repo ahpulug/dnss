@@ -1,6 +1,7 @@
 
 extern crate native_tls;
 extern crate dnss;
+use std::io::Bytes;
 use std::net::{UdpSocket,TcpStream};
 use std::io::{Read, Write};
 use dnss::dns::kinddns::{UdpDns,TcpDns};
@@ -8,10 +9,11 @@ use dnss::bytepacketbuffer::BytePacketBuffer;
 use dnss::dns::*;
 use native_tls::TlsConnector;
 fn main() {
+    loop{
     let qname = "www.yahoo.com";
     let qtype = QueryType::A;
     let server = ("1.1.1.1",853);
-    let socket = UdpSocket::bind("0.0.0.0:34254").unwrap();
+    let socket = UdpSocket::bind("0.0.0.0:5553").unwrap();
     let mut bytebuffer = BytePacketBuffer::new();    
     let (amt,src) = socket.recv_from(&mut bytebuffer.buf).unwrap();
     let mut packet = UdpDns::from_buffer(&mut bytebuffer).unwrap();
@@ -49,10 +51,27 @@ fn main() {
     let mut byte = BytePacketBuffer::new();
     packet.write(&mut byte).unwrap();
     stream.write_all(&mut byte.buf[..byte.pos]).unwrap();
-    let mut res = vec![];
-    stream.read_to_end(&mut res).unwrap();
+    let mut byte = BytePacketBuffer::new();
+    stream.read(&mut byte.buf).unwrap();
     println!("收到请求");
-    println!("{}", String::from_utf8_lossy(&res));
+    byte.pos = 0;
+    let mut res_packet = TcpDns::from_buffer(&mut byte).unwrap();
+    println!("{:?}", res_packet.header);
+    for q in res_packet.questions.clone() {
+        println!("{:?}", q);
+    }
+    for rec in res_packet.answers.clone() {
+        println!("{:?}", rec);
+    }
+    for rec in res_packet.authorities.clone() {
+        println!("{:?}", rec);
+    }
+    for rec in res_packet.resources.clone() {
+        println!("{:?}", rec);
+    }
+    let mut udp_byte = BytePacketBuffer::new();
+    res_packet.write(&mut udp_byte).unwrap();
+    socket.send_to(&udp_byte.buf[0..udp_byte.pos],&src).unwrap();
     // let mut packet = UdpDns::new();
     // packet.header.id = 6666;
     // packet.header.questions = 1;
@@ -80,4 +99,5 @@ fn main() {
     // }
 
     // Ok(())
+    }
 }
